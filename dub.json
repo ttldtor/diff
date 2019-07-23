@@ -1,0 +1,12 @@
+{
+    "authors": [
+        "ttldtor"
+    ],
+    "copyright": "Copyright © 2019, ttldtor",
+    "description": "D implementation of Myers Diff, based on port from the Java implementation of Myers Diff algorithm, based on a port from the C# implementation done by Nicholas Butler",
+    "license": "BSL-1.0",
+    "name": "diff",
+    "targetName": "diff",
+    "targetType": "library",
+    "targetPath": "bin",
+}

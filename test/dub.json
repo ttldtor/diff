@@ -1,0 +1,14 @@
+{
+    "authors": [
+        "ttldtor"
+    ],
+    "copyright": "Copyright © 2019, ttldtor",
+    "description": "Examples",
+    "license": "BSL-1.0",
+    "name": "test",
+    "targetPath": "../bin",
+    "targetType": "executable",
+    "dependencies": {
+        "diff": {"path": "../"}
+    }
+}

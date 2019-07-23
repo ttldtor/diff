@@ -1,0 +1,4 @@
+import diff;
+
+void main() {
+}
