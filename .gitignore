@@ -24,3 +24,7 @@ docs/
 *.lst
 
 .idea
+
+**/.dub
+bin
+docs
