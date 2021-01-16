@@ -8,32 +8,34 @@
 
 module diff.v;
 
+import std.conv;
+import std.format;
+import expected;
+
 /**
- * This class is a helper class to store the actual x-positions of end-points on a k-line.
- * It further provides a method to calculate the y-position for end-points based on the x-position and the k-line the
- * end point is lying on.
- *
- * Params:
- *     T = Source and destination element's type
- */
-final class V(T)
-{
-    private
-    {
+    This class is a helper class to store the actual x-positions of end-points on a k-line.
+    It further provides a method to calculate the y-position for end-points based on the x-position and the k-line the
+    end point is lying on.
+ 
+    Params:
+        T = Source and destination element's type
+*/
+final class V(T) {
+    private {
 
         /// Comparison direction flag
         bool isForward_;
-        /// Length of the first input
+        /// N. Length of the first input "string"
         int sourceSize_;
-        /// Length of the second input "string"
+        /// M. Length of the second input "string"
         int destSize_;
         /// The maximum number of end points to store
         int maxSize_;
         /**
-         * As the length of A (source) and B (destination) can be different, the k lines of the forward and reverse
-         * algorithms can be different. It is useful to isolate this as a variable
-         */
-        int deltaSize_;
+            As the length of A (source) and B (destination) can be different, the k lines of the forward and reverse
+            algorithms can be different. It is useful to isolate this as a variable
+        */
+        int delta_;
         /// Stores the actual x-position
         int[] data_;
 
@@ -41,102 +43,81 @@ final class V(T)
 
     /// V[k]
     int opIndex(int k)
-    in
+    in (k - delta_ + maxSize_ >= 0)
+    in (k - delta_ + maxSize_ < data_.length)
     {
-        assert(k - deltaSize_ + maxSize_ >= 0);
-        assert(k - deltaSize_ + maxSize_ < data_.length);
-    }
-    do
-    {
-        auto index = cast(size_t)(k - deltaSize_ + maxSize_);
-
-        return data_[index];
+        return data_[(k - delta_ + maxSize_).to!size_t];
     }
 
     /// V[k] = value
     int opIndexAssign(int value, size_t k)
-    in
+    in (k - delta_ + maxSize_ >= 0)
+    in (k - delta_ + maxSize_ < data_.length)
     {
-        assert(k - deltaSize_ + maxSize_ >= 0);
-        assert(k - deltaSize_ + maxSize_ < data_.length);
-    }
-    do
-    {
-        auto index = cast(size_t)(k - deltaSize_ + maxSize_);
-
-        return data_[index] = value;
+        return data_[(k - delta_ + maxSize_).to!size_t] = value;
     }
 
-    @property size_t length()
-    {
-        return data_.length;
+    /// Calculates the y-position of an end point based on the x-position and the k-line.
+    int y(int k) {
+        return this[k] - k;
     }
 
+    /// Returns: Comparison direction flag
     @property bool isForward() {
         return isForward_;
     }
 
+    /// Returns: Length of the first input "string"
     @property int sourceSize() {
         return sourceSize_;
     }
 
+    /// Returns: Length of the second input "string"
     @property int destSize() {
         return destSize_;
     }
 
     override string toString() const {
-        import std.conv : to;
-
-        return "V[" ~ data_.length.to!string ~ "][" ~ (deltaSize_ - maxSize_).to!string ~ ".." ~ deltaSize_.to!string
-               ~ ".." ~ (deltaSize_ + maxSize_).to!string ~ "]";
+        return format!"V[%s][%s..%s..%s]"(data_.length, delta_ - maxSize_, delta_, delta_ + maxSize_);
     }
 
     /**
-     * Initializes the k-line based on the comparison direction.
-     *
-     * Params:
-     *      sourceSize = The length of the first object to compare
-     *      destSize   = The length of the second object to compare
-     */
-    void initStub(int sourceSize, int destSize)
-    {
-        if (isForward)
-        {
-            opIndexAssign(0, 1);
-        }
-        else
-        {
-            deltaSize_ = sourceSize - destSize;
-
-            opIndexAssign(sourceSize, sourceSize - destSize - 1);
+        Initializes the k-line based on the comparison direction.
+        
+        Params:
+            sourceSize = The length of the first object to compare
+            destSize   = The length of the second object to compare
+    */
+    void initStub(int sourceSize, int destSize) {
+        if (isForward) {
+            this[1] = 0; // stub for forward
+        } else {
+            delta_ = sourceSize - destSize;
+            this[delta_ - 1] = sourceSize; // stub for forward
         }
     }
 
+    /// Default c-tor
     this() {}
 
     /**
-     * Creates a new instance of this helper class.
-     *
-     * Params:
-     *      sourceSize = The length of the first object which gets compared to the second
-     *      destSize   = The length of the second object which gets compared to the first
-     *      isForward  = The comparison direction; True if forward, false otherwise
-     *      isLinear   = True if a linear comparison should be used for comparing two objects or the greedy method (false)
+        Creates a new instance of this helper class.
+        
+        Params:
+            sourceSize = The length of the first object which gets compared to the second
+            destSize   = The length of the second object which gets compared to the first
+            isForward  = The comparison direction; True if forward, false otherwise
+            isLinear   = True if a linear comparison should be used for comparing two objects or the greedy method    (false)
      */
     this(int sourceSize, int destSize, bool isForward, bool isLinear)
-    in
-    {
-        assert(sourceSize >= 0 && destSize >= 0);
-    }
-    do
+    in (sourceSize >= 0 && destSize >= 0)
     {
         isForward_ = isForward;
         sourceSize_ = sourceSize;
         destSize_ = destSize;
         maxSize_ = isLinear ? (sourceSize + destSize) / 2 + 1 : sourceSize + destSize;
 
-        if (maxSize_ <= 0)
-        {
+        if (maxSize_ <= 0) {
             maxSize_ = 1;
         }
 
@@ -145,22 +126,18 @@ final class V(T)
     }
 
     /**
-     * Creates a new deep copy of this object.
-     *
-     * Params:
-     *      numberOfDifferences = The number of differences for the same trace
-     *      isForward           = The comparison direction; True if forward, false otherwise
-     *      deltaSize           = Keeps track of the differences between the first and the second object to compare as
-     *                            they may differ in length
-     *
-     * Returns: The deep copy of this object or empty
-     */
-    V!T createCopy(int numberOfDifferences, bool isForward, int deltaSize)
-    in
-    {
-        assert(!(isForward && deltaSize != 0));
-    }
-    do
+        Creates a new deep copy of this object.
+        
+        Params:
+            numberOfDifferences = The number of differences for the same trace
+            isForward           = The comparison direction; True if forward, false otherwise
+            deltaSize           = Keeps track of the differences between the first and the second object to compare as
+                                  they may differ in length
+        
+        Returns: The deep copy of this object or error
+    */
+    Expected!(V!T, string) createCopy(int numberOfDifferences, bool isForward, int deltaSize)
+    in (!(isForward && deltaSize != 0))
     {
         auto calculatedNumberOfDifferences = numberOfDifferences;
 
@@ -174,23 +151,34 @@ final class V(T)
         copy.maxSize_ = calculatedNumberOfDifferences;
 
         if (!isForward) {
-            copy.deltaSize_ = deltaSize;
+            copy.delta_ = deltaSize;
         }
 
-        auto newSize = cast(size_t)(2 * calculatedNumberOfDifferences + 1);
+        immutable auto newSize = (2 * calculatedNumberOfDifferences + 1).to!size_t;
 
         copy.data_.length = newSize;
 
         if (calculatedNumberOfDifferences <= maxSize_) {
-            auto startPos = (maxSize_ - deltaSize) - (copy.maxSize_ - copy.deltaSize_);
+            auto startPos = (maxSize_ - deltaSize) - (copy.maxSize_ - copy.delta_);
 
             for (size_t idx = 0; idx < newSize; idx++) {
-                copy.data_[idx] = data_[cast(size_t)(cast(int)(idx) + startPos)];
+                copy.data_[idx] = data_[(idx.to!int + startPos).to!size_t];
             }
         } else {
-            return null;
+            return err!(V!T)("V!T.createCopy: calculatedNumberOfDifferences > maxSize");
         }
 
-        return copy;
+        return ok(copy);
     }
+}
+
+unittest {
+    import std.stdio: writeln;
+    auto v = new V!int(30, 50, true, true);
+
+    writeln(v);
+
+    auto v2 = v.createCopy(1, true, 0);
+
+    writeln(v2);
 }

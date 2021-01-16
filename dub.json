@@ -9,4 +9,7 @@
     "targetName": "diff",
     "targetType": "library",
     "targetPath": "bin",
+    "dependencies": {
+        "expected": "~>0.2.3"
+    }
 }
