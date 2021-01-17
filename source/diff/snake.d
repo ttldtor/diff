@@ -318,61 +318,83 @@ final class Snake(T)
         return snake;
     }
 
-    /// Returns the x-position of a starting point
+    /// Returns: The x-position of the start point for this snake segment
     @property int xStart() {
         return xStart_;
     }
 
-    /// Returns the y-position of a starting point
+    /// Returns: The y-position of the start point for this snake segment
     @property int yStart() {
         return yStart_;
     }
 
-    /// Returns the starting point
+    /// Returns: The start point of this snake segment
     @property auto startPoint() {
         return point(xStart_, yStart_);
     }
 
+    /// Returns: The x-position of the middle point for this snake segment
     @property int xMid() {
         return isForward_ ? (xStart_ + deleted_) : (xStart_ - deleted_);
     }
 
+    /// Returns: The y-position of the middle point for this snake segment
     @property int yMid() {
         isForward_ ? (yStart_ + inserted_) : (yStart_ - inserted_);
     }
 
+    /// Returns: The middle point of this snake segment
     @property auto midPoint() {
         return point(xMid, yMid);
     }
 
+    /// Returns: The x-position of the end point for this snake segment
     @property int xEnd() {
         return isForward_ ? (xStart_ + deleted_ + diagonalLength_) : (xStart_ - deleted_ - diagonalLength_);
     }
 
+    /// Returns: The y-position of the end point for this snake segment
     @property int yEnd() {
         return isForward_ ? (yStart_ + inserted_ + diagonalLength_) : (yStart_ - inserted_ - diagonalLength_);
     }
 
+    /// Returns: The end point of this snake segment
     @property auto endPoint() {
         return point(xEnd, yEnd);
     }
 
+    /// Returns: true if this snake segment is a middle point.
+    @property bool isMiddle() {
+        return isMiddle_;
+    }
+
+    /**
+        Defines if this snake segment is a middle point.
+
+        Params:
+            value = `true` indicates that this segment is a middle point, `false` that it is not a middle point
+        Returns: the new value
+     */
     @property bool isMiddle(bool value) {
         return isMiddle_ = value;
     }
 
+    /// Returns: The number of inserted elements from the second object to match the first object (BInserted)
     @property int inserted() {
         return inserted_;
     }
 
+    /// Returns: The number of deleted elements from the first object to match the second object (ADeleted)
     @property int deleted() {
         return deleted_;
     }
 
+    /// Returns: the number of equal elements in both objects
     @property int diagonalLength() {
         return diagonalLength_;
     }
 
+    /// Returns: The comparison direction of both objects
     @property bool isForward() {
         return isForward_;
     }
