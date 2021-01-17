@@ -2,9 +2,9 @@
     V
 
     Authors: ttldtor
-    Copyright: © 2019-2020 ttldtor
+    Copyright: © 2019-2021 ttldtor
     License: Subject to the terms of the BSL-1.0 license, as written in the included LICENSE file.
-*/
+ */
 
 module diff.v;
 
@@ -19,7 +19,7 @@ import expected;
  
     Params:
         T = Source and destination element's type
-*/
+ */
 final class V(T) {
     private {
 
@@ -34,7 +34,7 @@ final class V(T) {
         /**
             As the length of A (source) and B (destination) can be different, the k lines of the forward and reverse
             algorithms can be different. It is useful to isolate this as a variable
-        */
+         */
         int delta_;
         /// Stores the actual x-position
         int[] data_;
@@ -42,7 +42,7 @@ final class V(T) {
     }
 
     /// V[k]
-    int opIndex(int k)
+    int opIndex(int k) const
     in (k - delta_ + maxSize_ >= 0)
     in (k - delta_ + maxSize_ < data_.length)
     {
@@ -58,22 +58,22 @@ final class V(T) {
     }
 
     /// Calculates the y-position of an end point based on the x-position and the k-line.
-    int y(int k) {
+    int y(int k) const {
         return this[k] - k;
     }
 
     /// Returns: Comparison direction flag
-    @property bool isForward() {
+    @property bool isForward() const {
         return isForward_;
     }
 
     /// Returns: Length of the first input "string"
-    @property int sourceSize() {
+    @property int sourceSize() const {
         return sourceSize_;
     }
 
     /// Returns: Length of the second input "string"
-    @property int destSize() {
+    @property int destSize() const {
         return destSize_;
     }
 
@@ -87,7 +87,7 @@ final class V(T) {
         Params:
             sourceSize = The length of the first object to compare
             destSize   = The length of the second object to compare
-    */
+     */
     void initStub(int sourceSize, int destSize) {
         if (isForward) {
             this[1] = 0; // stub for forward
@@ -135,7 +135,7 @@ final class V(T) {
                                   they may differ in length
         
         Returns: The deep copy of this object or error
-    */
+     */
     Expected!(V!T, string) createCopy(int numberOfDifferences, bool isForward, int deltaSize)
     in (!(isForward && deltaSize != 0))
     {

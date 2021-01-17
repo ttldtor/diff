@@ -4,10 +4,12 @@
     $(LINK http://www.codeproject.com/Articles/42279/Investigating-Myers-diff-algorithm-Part-1-of-2)
 
     Authors: ttldtor
-    Copyright: © 2019-2020 ttldtor
+    Copyright: © 2019-2021 ttldtor
     License: Subject to the terms of the BSL-1.0 license, as written in the included LICENSE file.
  */
 
 module diff;
 
 public import diff.v;
+public import diff.snake;
+public import diff.snake_pair;
