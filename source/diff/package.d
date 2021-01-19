@@ -13,3 +13,4 @@ module diff;
 public import diff.v;
 public import diff.snake;
 public import diff.snake_pair;
+public import diff.lcs_snake_provider;
