@@ -15,3 +15,5 @@ public import diff.snake;
 public import diff.snake_pair;
 public import diff.lcs_snake_provider;
 public import diff.results;
+public import diff.linear_comparator;
+public import diff.greedy_comparator;
