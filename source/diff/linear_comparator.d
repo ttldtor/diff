@@ -1,3 +1,11 @@
+/**
+    Linear comparator
+
+    Authors: ttldtor
+    Copyright: © 2019-2021 ttldtor
+    License: Subject to the terms of the BSL-1.0 license, as written in the included LICENSE file.
+ */
+
 module diff.linear_comparator;
 
 import diff.snake;
