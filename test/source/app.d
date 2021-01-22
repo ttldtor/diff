@@ -17,4 +17,5 @@ void main()
     writeln(s);
 
     auto snakePair = new SnakePair!int(5, new Snake!int(true, 5), new Snake!int(false, 5));
+    auto snakeProvider = new LcsSnakeProvider!int();
 }

@@ -32,9 +32,6 @@ final class LcsSnakeProvider(T) {
             sourceSize     = The index of the last element from the first object to compare
             dest           = Elements of the second object. Usually the current object
             destSize       = The index of the last element from the second object to compare
-            isForward      = If set to `true` a forward comparison will be done; else a backward comparison
-            delta          = The difference in length between the first and second object to compare. This value is used as an
-                             offset between the forward k lines to the reverse ones (DELTA)
             v              = An array of end points for a given k-line
             d              = Number of differences for the same trace
 
@@ -68,5 +65,51 @@ final class LcsSnakeProvider(T) {
 
         return err!(Snake!T)("LcsSnakeProvider!T.forward: Can't create a snake");
     }
+
+    /**
+        Calculates the longest common subsequence (LCS) in a backward manner for two objects.
+
+        Params:
+            SourceRange    = The source range type
+            DestRange      = The destination range type
+            source         = Elements of the first object. Usually the original object
+            sourceSize     = The index of the last element from the first object to compare
+            dest           = Elements of the second object. Usually the current object
+            destSize       = The index of the last element from the second object to compare
+            v              = An array of end points for a given k-line
+            d              = Number of differences for the same trace
+
+        Returns: The new snake that represents LCS or error
+     */
+    Expected!(Snake!T, string) reverse(SourceRange, DestRange)(SourceRange source, int sourceSize, DestRange dest, 
+        int destSize, V!T v, int d)
+        if (isRandomAccessRange!SourceRange && isRandomAccessRange!DestRange 
+            && (is(ElementType!SourceRange.init == ElementType!DestRange.init)))
+    {
+        const deltaSize = sourceSize - destSize;
+
+        for (auto k = -d + deltaSize; k <= d + deltaSize; k += 2) {
+            auto up = (k == d + deltaSize || (k != -d + deltaSize && v[k - 1] < v[k + 1]));
+            auto xStart = up ? v[k - 1] : v[k + 1];
+            auto yStart = xStart - (up ? k - 1 : k + 1);
+            auto xEnd = up ? xStart : xStart - 1;
+            auto yEnd = xEnd - k;
+            auto diagonalLength = 0;
+
+            while (xEnd > 0 && yEnd > 0 && source[xEnd - 1] == dest[yEnd - 1]) {
+                xEnd--;
+                yEnd--;
+                diagonalLength++;
+            }
+            
+            v[k] = xEnd;
+            
+            if (xEnd <= 0 && yEnd <= 0) {
+                return ok(new Snake!T(0, sourceSize, 0, destSize, false, xStart, yStart, up, diagonalLength));
+            }
+        }
+
+        return err!(Snake!T)("LcsSnakeProvider!T.reverse: Can't create a snake");
+    }    
 }
 
