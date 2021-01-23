@@ -11,6 +11,7 @@ module diff.snake;
 import diff.v;
 import std.typecons;
 import std.format;
+import std.algorithm.comparison;
 
 /**
     A simple 2D point type
@@ -110,7 +111,7 @@ final class Snake(T) {
     private void calculateForward(SourceRange, DestRange)(V!T v, int k, int d, SourceRange source, int sourceStartPos, 
         int sourceSize, DestRange dest, int destStartPos, int destSize) 
     if (isRandomAccessRange!SourceRange && isRandomAccessRange!DestRange 
-        && (is(ElementType!SourceRange.init == ElementType!DestRange.init)))
+        && (is(ElementType!SourceRange.init == ElementType!DestRange.init)) && is(ElementType!SourceRange.init == T))
     {
         const auto down = (k == -d || (k != d && v[k - 1] < v[k + 1]));
         const int xStart = down ? v[K - 1] : v[k + 1];
@@ -155,7 +156,7 @@ final class Snake(T) {
     private void calculateBackward(SourceRange, DestRange)(V!T v, int k, int d, SourceRange source, int sourceStartPos, 
         int sourceSize, DestRange dest, int destStartPos, int destSize) 
     if (isRandomAccessRange!SourceRange && isRandomAccessRange!DestRange 
-        && (is(ElementType!SourceRange.init == ElementType!DestRange.init)))
+        && (is(ElementType!SourceRange.init == ElementType!DestRange.init)) && is(ElementType!SourceRange.init == T))
     {
         const auto up = (k == d + deltaSize_ || (k != -d + deltaSize_ && v[k - 1] < v[k + 1]));
         const int xStart = up ? v[k - 1] : v[k + 1];
@@ -198,8 +199,8 @@ final class Snake(T) {
      */
     private void calculate(SourceRange, DestRange)(V!T v, int k, int d, SourceRange source, int sourceStartPos, 
         int sourceSize, DestRange dest, int destStartPos, int destSize) 
-        if (isRandomAccessRange!SourceRange && isRandomAccessRange!DestRange 
-        && (is(ElementType!SourceRange.init == ElementType!DestRange.init)))
+    if (isRandomAccessRange!SourceRange && isRandomAccessRange!DestRange 
+        && (is(ElementType!SourceRange.init == ElementType!DestRange.init)) && is(ElementType!SourceRange.init == T))
     {
         if (isForward_) {
             calculateForward(v, k, d, source, sourceStartPos, sourceSize, dest, destStartPos, destSize);
@@ -307,8 +308,8 @@ final class Snake(T) {
      */
     static Snake!T create(SourceRange, DestRange)(int sourceStartPos, int sourceSize, int destStartPos, int destSize,
         bool isForward, int delta, V!T v, int k, int d, SourceRange source, DestRange dest)
-        if (isRandomAccessRange!SourceRange && isRandomAccessRange!DestRange 
-        && (is(ElementType!SourceRange.init == ElementType!DestRange.init)))
+    if (isRandomAccessRange!SourceRange && isRandomAccessRange!DestRange 
+        && (is(ElementType!SourceRange.init == ElementType!DestRange.init)) && is(ElementType!SourceRange.init == T))
     {
         auto snake = new Snake!T(isForward, delta);
         
@@ -401,5 +402,40 @@ final class Snake(T) {
     override string toString() const {
         return format!"Snake{type = %s, start = (%s, %s), del = %s, ins = %s, diagLen = %s, end = (%s, %s), k = %s}"(
             (isForward_) ? "F" : "R", xStart_, yStart_, deleted_, inserted_, diagonalLength_, xEnd, yEnd, xMid - yMid);
+    }
+
+    /**
+        Combines two snakes of the same kind to reduce the number of returned snakes.
+
+        A snake is of the same kind if both are in the same direction and if both have either a positive deleted(ADeleted) field 
+        or a positive BInserted field, but not either a positive ADeleted and the other a positive inserted(BInserted) field!
+        Moreover, if the snake to append has a DiagonalLength > 0 it is not meant to be of the same kind and therefore
+        should not be appended to this snake.
+
+        Params:
+            snake = The snake to append to the current snake
+
+        Returns: true if the snake could be appended to this snake; false otherwise
+     */
+    bool append(Snake!T snake) {
+        if (((isForward_ && diagonalLength_ >= 0) || (!isForward_ && snake.diagonalLength_ >= 0)) 
+            && ((deleted_ > 0 && snake.deleted_ > 0) || (inserted_ > 0 && snake.inserted_ > 0)))
+        {
+            deleted_ += snake.deleted_;
+            inserted_ += snake.inserted_;
+            diagonalLength_ += snake.diagonalLength_;
+
+            if (isForward_) {
+                xStart_ = min(xStart_, snake.xStart_);
+                yStart_ = min(yStart_, snake.yStart_);
+            } else {
+                xStart_ = max(xStart_, snake.xStart_);
+                yStart_ = max(yStart_, snake.yStart_);
+            }
+
+            return true;
+        }
+
+        return false;
     }
 }

@@ -40,8 +40,8 @@ final class LcsSnakeProvider(T) {
      */
     Expected!(Snake!T, string) forward(SourceRange, DestRange)(SourceRange source, int sourceSize, DestRange dest, 
         int destSize, V!T v, int d)
-        if (isRandomAccessRange!SourceRange && isRandomAccessRange!DestRange 
-            && (is(ElementType!SourceRange.init == ElementType!DestRange.init)))
+    if (isRandomAccessRange!SourceRange && isRandomAccessRange!DestRange 
+        && (is(ElementType!SourceRange.init == ElementType!DestRange.init)) && is(ElementType!SourceRange.init == T))
     {
         for (int k = -d; k <= d; k += 2) {
             auto down = (k == -d || (k != d && v[k - 1] < v[k + 1]));
@@ -84,8 +84,8 @@ final class LcsSnakeProvider(T) {
      */
     Expected!(Snake!T, string) reverse(SourceRange, DestRange)(SourceRange source, int sourceSize, DestRange dest, 
         int destSize, V!T v, int d)
-        if (isRandomAccessRange!SourceRange && isRandomAccessRange!DestRange 
-            && (is(ElementType!SourceRange.init == ElementType!DestRange.init)))
+    if (isRandomAccessRange!SourceRange && isRandomAccessRange!DestRange 
+        && (is(ElementType!SourceRange.init == ElementType!DestRange.init)) && is(ElementType!SourceRange.init == T))
     {
         const deltaSize = sourceSize - destSize;
 
@@ -136,8 +136,8 @@ final class LcsSnakeProvider(T) {
     Expected!(SnakePair!T, string) middle(SourceRange, DestRange)(SourceRange source, int sourceStartPos, 
         int sourceSize, DestRange dest, int destStartPos, int destSize, V!T vForward, V!T vReverse, V!T[]* forwardVs, 
         V!T[]* reverseVs)
-        if (isRandomAccessRange!SourceRange && isRandomAccessRange!DestRange 
-            && (is(ElementType!SourceRange.init == ElementType!DestRange.init)))
+    if (isRandomAccessRange!SourceRange && isRandomAccessRange!DestRange 
+        && (is(ElementType!SourceRange.init == ElementType!DestRange.init)) && is(ElementType!SourceRange.init == T))
     {
         const maxSize = (sourceSize + destSize + 1) / 2;
         auto deltaSize = sourceSize - destSize;
