@@ -12,6 +12,7 @@ import diff.v;
 import diff.snake;
 import diff.snake_pair;
 import expected;
+import std.typecons;
 
 /**
     Utility class that provides functions to calculate the longest common subsequence (LCS) for forward, backward and 
@@ -35,7 +36,7 @@ final class LcsSnakeProvider(T) {
             v              = An array of end points for a given k-line
             d              = Number of differences for the same trace
 
-        Returns: The new snake that represents LCS or error
+        Returns: The new snake that represents LCS or an error
      */
     Expected!(Snake!T, string) forward(SourceRange, DestRange)(SourceRange source, int sourceSize, DestRange dest, 
         int destSize, V!T v, int d)
@@ -79,7 +80,7 @@ final class LcsSnakeProvider(T) {
             v              = An array of end points for a given k-line
             d              = Number of differences for the same trace
 
-        Returns: The new snake that represents LCS or error
+        Returns: The new snake that represents LCS or an error
      */
     Expected!(Snake!T, string) reverse(SourceRange, DestRange)(SourceRange source, int sourceSize, DestRange dest, 
         int destSize, V!T v, int d)
@@ -110,6 +111,135 @@ final class LcsSnakeProvider(T) {
         }
 
         return err!(Snake!T)("LcsSnakeProvider!T.reverse: Can't create a snake");
-    }    
+    }
+
+    /**
+        Calculates the middle snake segment by comparing object $(D_PARAM source) with $(D_PARAM dest) in both directions.
+        The overlap of both comparisons is the so called middle snake which is already a part of the solution as proven by Myers.
+
+        Params:
+            SourceRange    = The source range type
+            DestRange      = The destination range type
+            source         = Elements of the first object. Usually the original object
+            sourceStartPos = The starting position in the array of elements from the first object to compare (a0)
+            sourceSize     = The index of the last element from the first object to compare
+            dest           = Elements of the second object. Usually the current object
+            destStartPos   = The starting position in the array of elements from the second object to compare (b0)
+            destSize       = The index of the last element from the second object to compare
+            vForward       = An array of end points for a given k-line for the forward comparison
+            vReverse       = An array of end points for a given k-line for the backward comparison
+            forwardVs      = All saved end points indexed on <em>d</em> for the forward comparison
+            reverseVs      = All saved end points indexed on <em>d</em> for the backward comparison
+
+        Returns: The first segment found by both comparison directions which is also called the middle snake or an error
+     */
+    Expected!(SnakePair!T, string) middle(SourceRange, DestRange)(SourceRange source, int sourceStartPos, 
+        int sourceSize, DestRange dest, int destStartPos, int destSize, V!T vForward, V!T vReverse, V!T[]* forwardVs, 
+        V!T[]* reverseVs)
+        if (isRandomAccessRange!SourceRange && isRandomAccessRange!DestRange 
+            && (is(ElementType!SourceRange.init == ElementType!DestRange.init)))
+    {
+        const maxSize = (sourceSize + destSize + 1) / 2;
+        auto deltaSize = sourceSize - destSize;
+
+        vForward.initStub(sourceSize, destSize);
+        vReverse.initStub(sourceSize, destSize);
+
+        const deltaIsEven = (deltaSize % 2 == 0);
+
+        for (auto d = 0; d <= maxSize; d++) {
+            //forward
+            {
+                scope(exit) {
+                    if (forwardVs !is null) {
+                        auto vForwardCopyOpt = vForward.createCopy(d, true, 0);
+
+                        if (vForwardCopyOpt.hasValue) {
+                            *forwardVs ~= vForwardCopyOpt.value;
+                        }
+                    }
+                }
+
+                for (auto k = -d; k <= d; k += 2) {
+                    const down = k == -d || (k != d && vForward[k - 1] < vForward[k + 1]);
+                    const xStart = down ? vForward[k + 1] : vForward[k - 1];
+                    const yStart = xStart - (down ? k + 1 : k - 1);
+                    auto xEnd = down ? xStart : xStart + 1;
+                    auto yEnd = xEnd - k;
+                    auto diagonalLength = 0;
+
+                    while (xEnd < sourceSize && yEnd < destSize 
+                        && source[xEnd + sourceStartPos] ==  dest[yEnd + destStartPos])
+                    {
+                        xEnd++;
+                        yEnd++;
+                        diagonalLength++;
+                    }
+
+                    vForward[k] = xEnd;
+
+                    if (deltaIsEven || k < deltaSize - (d - 1) || k > deltaSize + (d - 1)) {
+                        continue;
+                    }
+
+                    if (vForward[k] < vReverse[k]) {
+                        continue;
+                    }
+
+                    auto forward = new Snake!T(sourceStartPos, sourceSize, destStartPos, destSize, true, 
+                        xStart + sourceStartPos, yStart + destStartPos, down, diagonalLength, d);
+
+                    return new SnakePair!T(2 * d - 1, forward, null);
+                }
+            }
+
+            //backward
+            {
+                scope(exit) {
+                    if (reverseVs !is null) {
+                        auto vReverseCopyOpt = vReverse.createCopy(d, false, deltaSize);
+
+                        if (vReverseCopyOpt.hasValue) {
+                            *reverseVs ~= vReverseCopyOpt.value;
+                        }
+                    }
+                }
+
+                for (auto k = -d + deltaSize; k <= d + deltaSize; k += 2) {
+                    const up = k == d + deltaSize || (k != -d + deltaSize && vReverse[k - 1] < vReverse[k + 1]);
+                    const xStart = up ? vReverse[k - 1] : vReverse[k + 1];
+                    const yStart = xStart - (up ? k - 1 : k + 1);
+                    auto xEnd = up ? xStart : xStart - 1;
+                    auto yEnd = xEnd - k;
+                    auto diagonalLength = 0;
+
+                    while (xEnd > 0 && yEnd > 0
+                        && source[xEnd + sourceStartPos - 1] == dest[yEnd + destStartPos - 1]) 
+                    {
+                        xEnd--;
+                        yEnd--;
+                        diagonalLength++;
+                    }
+
+                    vReverse[k] = xEnd;
+
+                    if (!deltaIsEven || k < -d || k > d) {
+                        continue;
+                    }
+
+                    if (vReverse[k] > vForward[k]) {
+                        continue;
+                    }
+
+                    auto reverse = new Snake!T(sourceStartPos, sourceSize, destStartPos, destSize, false, 
+                        xStart + sourceStartPos, yStart + destStartPos, up, diagonalLength, d);
+
+                    return new SnakePair!T(2 * d, null, reverse);
+                }
+            }
+        }
+
+        return err!(SnakePair!T)("LcsSnakeProvider!T.middle: Can't create a snake pair");
+    }  
 }
 

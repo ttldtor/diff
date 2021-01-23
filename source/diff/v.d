@@ -107,7 +107,7 @@ final class V(T) {
             sourceSize = The length of the first object which gets compared to the second
             destSize   = The length of the second object which gets compared to the first
             isForward  = The comparison direction; True if forward, false otherwise
-            isLinear   = True if a linear comparison should be used for comparing two objects or the greedy method    (false)
+            isLinear   = True if a linear comparison should be used for comparing two objects or the greedy method (false)
      */
     this(int sourceSize, int destSize, bool isForward, bool isLinear)
     in (sourceSize >= 0 && destSize >= 0)
