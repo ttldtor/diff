@@ -79,14 +79,14 @@ final class LinearComparator(T) {
 
         // Calculate middle snake
         auto snakeProvider = LcsSnakeProvider!T();
-        auto middleOpt = snakeProvider.middle(source, sourceStartPos, sourceSize, dest, destStartPos, destSize, 
+        const middleOpt = snakeProvider.middle(source, sourceStartPos, sourceSize, dest, destStartPos, destSize, 
             vForward, vReverse, forwardVs, reverseVs);
 
         if (!middleOpt) {
             return err!void("LinearComparator!T.compare: middle snakes pair is empty");
         }
 
-        SnakePair!T middle = middleOpt.value;
+        const SnakePair!T middle = middleOpt.value;
         Snake!T forward = middle.forward;
         Snake!T reverse = middle.reverse;
 

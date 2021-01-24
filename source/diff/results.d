@@ -24,12 +24,28 @@ final class Results(T) {
         V!T[] reverseVs_;
     }
 
+    /**
+        Constructs the results by snake segments, end points in forward direction and end points in backward direction
+
+        Params:
+            snakes    = The snake segments
+            forwardVs = The end points in forward direction
+            reverseVs = The end points in backward direction
+     */
     this(Snake!T[] snakes, V!T[] forwardVs, V!T[] reverseVs) {
         snakes_ = snakes;
         forwardVs_ = forwardVs;
         reverseVs_ = reverseVs;
     }
 
+    /**
+        Constructs the results by snake segments, direction flag and end points in the specified direction
+
+        Params:
+            snakes    = The snake segments
+            forward   = The direction flag. `True` - forward direction, `False` - backward direction.
+            vs = The end points
+     */
     this(Snake!T[] snakes, bool forward, V!T[] vs) {
         snakes_ = snakes;
 
@@ -41,14 +57,17 @@ final class Results(T) {
     }
 
     @property {
+        /// Returns: The snake segments
         Snake!T[] snakes() const {
             return snakes_;
         }
 
+        /// Returns: The end points in forward direction 
         V!T[] forwardVs() const {
             return forwardVs_;
         }
 
+        /// Returns: The end points in backward direction 
         V!T[] reverseVs() const {
             return reverseVs_;
         }
