@@ -52,7 +52,7 @@ final class LinearComparator(T) {
     Expected!void compare(R)(int recursion, ref Snake!T[] snakes, V[]* forwardVs, 
         V[]* reverseVs, R source, int sourceStartPos, int sourceSize, R dest, int destStartPos, 
         int destSize, V vForward, V vReverse)
-    if ((isRandomAccessRange!R || isSomeString!R))
+    if (isRandomAccessRange!R || isSomeString!R)
     {
         if (destSize == 0 && sourceSize > 0) {
             // Add sourceSize (N) deletions to SES
@@ -199,7 +199,7 @@ final class LinearComparator(T) {
 
      */
     Expected!(Results!T) compare(R)(R source, R dest)
-    if ((isRandomAccessRange!R || isSomeString!R))
+    if (isRandomAccessRange!R || isSomeString!R)
     {
         auto vForward = new V(source.length.to!int, dest.length.to!int, true, true);
         auto vReverse = new V(source.length.to!int, dest.length.to!int, false, true);
@@ -218,10 +218,24 @@ final class LinearComparator(T) {
     }
 }
 
+/// The utility class to create linear comparators
 class LinearComparatorFabric {
+    /**
+        Creates the linear comparator by range type
+
+        Params:
+            R = The source & destination range type
+
+        Returns: The new linear comparator
+     */
     static auto create(R)() {
         return new LinearComparator!(ElementType!R)();
     }
+}
+
+/// The helper function to create linear comparator by range type
+auto linearComparator(R)() {
+    return LinearComparatorFabric.create!R();
 }
 
 unittest {
@@ -230,4 +244,18 @@ unittest {
     auto comparator = LinearComparatorFabric.create!string();
 
     auto result = comparator.compare("abcdabcd", "abcdbcda");
+
+    assert(result.hasValue);
+    assert(result.value.snakes.length > 0);
+
+    writeln(result.value.snakes);
+
+    auto comparator2 = linearComparator!(int[])();
+
+    auto result2 = comparator2.compare([0, 1, 2, 0, 0], [1, 2, 0, 0, 0]);
+
+    assert(result2.hasValue);
+    assert(result2.value.snakes.length > 0);
+
+    writeln(result2.value.snakes);
 }

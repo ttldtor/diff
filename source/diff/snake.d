@@ -328,12 +328,12 @@ final class Snake(T) {
     }
 
     /// Returns: The x-position of the middle point for this snake segment
-    @property int xMid() {
+    @property int xMid() const {
         return isForward_ ? (xStart_ + deleted_) : (xStart_ - deleted_);
     }
 
     /// Returns: The y-position of the middle point for this snake segment
-    @property int yMid() {
+    @property int yMid() const {
         return isForward_ ? (yStart_ + inserted_) : (yStart_ - inserted_);
     }
 
@@ -343,12 +343,12 @@ final class Snake(T) {
     }
 
     /// Returns: The x-position of the end point for this snake segment
-    @property int xEnd() {
+    @property int xEnd() const {
         return isForward_ ? (xStart_ + deleted_ + diagonalLength_) : (xStart_ - deleted_ - diagonalLength_);
     }
 
     /// Returns: The y-position of the end point for this snake segment
-    @property int yEnd() {
+    @property int yEnd() const {
         return isForward_ ? (yStart_ + inserted_ + diagonalLength_) : (yStart_ - inserted_ - diagonalLength_);
     }
 
@@ -393,7 +393,7 @@ final class Snake(T) {
         return isForward_;
     }
 
-    override string toString() {
+    override string toString() const {
         return format!"Snake{type = %s, start = (%s, %s), del = %s, ins = %s, diagLen = %s, end = (%s, %s), k = %s}"(
             (isForward_) ? "F" : "R", xStart_, yStart_, deleted_, inserted_, diagonalLength_, xEnd, yEnd, xMid - yMid);
     }

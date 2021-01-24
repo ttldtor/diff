@@ -40,7 +40,7 @@ final class LcsSnakeProvider(T) {
         Returns: The new snake that represents LCS or an error
      */
     Expected!(Snake!T, string) forward(R)(R source, int sourceSize, R dest, int destSize, V v, int d)
-    if ((isRandomAccessRange!R || isSomeString!R))
+    if (isRandomAccessRange!R || isSomeString!R)
     {
         for (int k = -d; k <= d; k += 2) {
             auto down = (k == -d || (k != d && v[k - 1] < v[k + 1]));
@@ -81,7 +81,7 @@ final class LcsSnakeProvider(T) {
         Returns: The new snake that represents LCS or an error
      */
     Expected!(Snake!T, string) reverse(R)(R source, int sourceSize, R dest, int destSize, V v, int d)
-    if ((isRandomAccessRange!R || isSomeString!R))
+    if (isRandomAccessRange!R || isSomeString!R)
     {
         const deltaSize = sourceSize - destSize;
 
@@ -130,7 +130,7 @@ final class LcsSnakeProvider(T) {
      */
     Expected!(SnakePair!T, string) middle(R)(R source, int sourceStartPos, int sourceSize, R dest, int destStartPos, 
         int destSize, V vForward, V vReverse, V[]* forwardVs, V[]* reverseVs)
-    if ((isRandomAccessRange!R || isSomeString!R))
+    if (isRandomAccessRange!R || isSomeString!R)
     {
         const maxSize = (sourceSize + destSize + 1) / 2;
         auto deltaSize = sourceSize - destSize;
