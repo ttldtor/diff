@@ -14,6 +14,9 @@ import diff.v;
 import diff.results;
 import diff.lcs_snake_provider;
 import expected;
+import std.range.primitives;
+import std.traits;
+import std.conv;
 
 /**
     Linear comparator
@@ -29,8 +32,7 @@ final class LinearComparator(T) {
         actions required to perform the transformation.
 
         Params:
-            SourceRange    = The source range type
-            DestRange      = The destination range type
+            R              = The source & destination range type
             recursion      = The number of the current recursive step
             snakes         = The possible solution paths for transforming object $(D_PARAM source) to $(D_PARAM dest)
             forwardVs      = All saved end points in forward direction indexed on <em>d</em>
@@ -47,11 +49,10 @@ final class LinearComparator(T) {
         Returns: ok() if the ranges could be compared; Error string (err!void) otherwise
 
      */
-    Expected!void compare(SourceRange, DestRange)(int recursion, ref Snake!T[] snakes, V!T[]* forwardVs, 
-        V!T[]* reverseVs, SourceRange source, int sourceStartPos, int sourceSize, DestRange dest, int destStartPos, 
-        int destSize, V!T vForward, V!T vReverse)
-    if (isRandomAccessRange!SourceRange && isRandomAccessRange!DestRange 
-        && (is(ElementType!SourceRange.init == ElementType!DestRange.init)) && is(ElementType!SourceRange.init == T))
+    Expected!void compare(R)(int recursion, ref Snake!T[] snakes, V[]* forwardVs, 
+        V[]* reverseVs, R source, int sourceStartPos, int sourceSize, R dest, int destStartPos, 
+        int destSize, V vForward, V vReverse)
+    if ((isRandomAccessRange!R || isSomeString!R))
     {
         if (destSize == 0 && sourceSize > 0) {
             // Add sourceSize (N) deletions to SES
@@ -78,15 +79,15 @@ final class LinearComparator(T) {
         }
 
         // Calculate middle snake
-        auto snakeProvider = LcsSnakeProvider!T();
-        const middleOpt = snakeProvider.middle(source, sourceStartPos, sourceSize, dest, destStartPos, destSize, 
+        auto snakeProvider = new LcsSnakeProvider!T();
+        auto middleOpt = snakeProvider.middle!R(source, sourceStartPos, sourceSize, dest, destStartPos, destSize, 
             vForward, vReverse, forwardVs, reverseVs);
 
         if (!middleOpt) {
             return err!void("LinearComparator!T.compare: middle snakes pair is empty");
         }
 
-        const SnakePair!T middle = middleOpt.value;
+        SnakePair!T middle = middleOpt.value;
         Snake!T forward = middle.forward;
         Snake!T reverse = middle.reverse;
 
@@ -128,11 +129,11 @@ final class LinearComparator(T) {
 
             // bottom right .. Compare(A[u+1..N], N-u, B[v+1..M], M-v)
             auto uv = (reverse !is null) ? reverse.startPoint : forward.endPoint;
+            compareResult = compare(recursion + 1, snakes, null, null, source, uv.x, 
+                sourceStartPos + sourceSize - uv.x, dest, uv.y, destStartPos + destSize - uv.y, vForward, vReverse);
 
-            if (!compare(recursion + 1, snakes, null, null, source, uv.x, sourceStartPos + sourceSize - uv.x, dest,
-                        uv.y,
-                        destStartPos + destSize - uv.y, vForward, vReverse, equalTo)) {
-                return false;
+            if (!compareResult) {
+                return compareResult;
             }
         } else {
             // We found an edge case. If d == 0 than both segments are identical
@@ -180,6 +181,53 @@ final class LinearComparator(T) {
             }
         }
 
-        return true;
+        return ok();
     }
+
+
+    /**
+        Compares two random access ranges of type <em>T</em> with each other and calculates the shortest edit sequence (SES) as well as
+        the longest common subsequence (LCS) to transfer input $(D_PARAM source) to input $(D_PARAM dest). The SES are the necessary
+        actions required to perform the transformation.
+
+        Params:
+            R              = The source & destination range type
+            source         = Elements of the first object. Usually the original object
+            dest           = Elements of the second object. Usually the current object
+
+        Returns: The result containing the snake that lead from input $(D_PARAM source) to input $(D_PARAM dest)
+
+     */
+    Expected!(Results!T) compare(R)(R source, R dest)
+    if ((isRandomAccessRange!R || isSomeString!R))
+    {
+        auto vForward = new V(source.length.to!int, dest.length.to!int, true, true);
+        auto vReverse = new V(source.length.to!int, dest.length.to!int, false, true);
+        Snake!T[] snakes = [];
+        V[] forwardVs = [];
+        V[] reverseVs = [];
+
+        auto compareResult = compare!R(0, snakes, &forwardVs, &reverseVs, source, 0, source.length.to!int, dest, 0, 
+            dest.length.to!int, vForward, vReverse);
+
+        if (!compareResult) {
+            return err!(Results!T)(compareResult.error);
+        }
+
+        return ok(new Results!T(snakes, forwardVs, reverseVs));
+    }
+}
+
+class LinearComparatorFabric {
+    static auto create(R)() {
+        return new LinearComparator!(ElementType!R)();
+    }
+}
+
+unittest {
+    import std.stdio: writeln;
+    
+    auto comparator = LinearComparatorFabric.create!string();
+
+    auto result = comparator.compare("abcdabcd", "abcdbcda");
 }

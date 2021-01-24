@@ -12,6 +12,8 @@ import diff.v;
 import std.typecons;
 import std.format;
 import std.algorithm.comparison;
+import std.range.primitives;
+import std.traits;
 
 /**
     A simple 2D point type
@@ -96,8 +98,7 @@ final class Snake(T) {
         Calculates a new snake segment for a forward comparison direction.
 
         Params:
-            SourceRange    = The source range type
-            DestRange      = The destination range type
+            R              = The source & destination range type
             v              = An array of end points for a given k-line
             k              = The k-line the snake should get calculated for
             d              = Number of differences for the same trace
@@ -108,10 +109,9 @@ final class Snake(T) {
             destStartPos   = The starting position in the array of elements from the second object to compare
             destSize       = The index of the last element from the second object to compare
      */
-    private void calculateForward(SourceRange, DestRange)(V!T v, int k, int d, SourceRange source, int sourceStartPos, 
-        int sourceSize, DestRange dest, int destStartPos, int destSize) 
-    if (isRandomAccessRange!SourceRange && isRandomAccessRange!DestRange 
-        && (is(ElementType!SourceRange.init == ElementType!DestRange.init)) && is(ElementType!SourceRange.init == T))
+    private void calculateForward(R)(V v, int k, int d, R source, int sourceStartPos, int sourceSize, R dest, 
+        int destStartPos, int destSize) 
+    if ((isRandomAccessRange!R || isSomeString!R) && is(ElementType!E == T))
     {
         const auto down = (k == -d || (k != d && v[k - 1] < v[k + 1]));
         const int xStart = down ? v[K - 1] : v[k + 1];
@@ -141,8 +141,7 @@ final class Snake(T) {
         Calculates a new snake segment for a backward comparison direction.
 
         Params:
-            SourceRange    = The source range type
-            DestRange      = The destination range type
+            R              = The source & destination range type
             v              = An array of end points for a given k-line
             k              = The k-line the snake should get calculated for
             d              = Number of differences for the same trace
@@ -153,10 +152,9 @@ final class Snake(T) {
             destStartPos   = The starting position in the array of elements from the second object to compare
             destSize       = The index of the last element from the second object to compare
      */
-    private void calculateBackward(SourceRange, DestRange)(V!T v, int k, int d, SourceRange source, int sourceStartPos, 
-        int sourceSize, DestRange dest, int destStartPos, int destSize) 
-    if (isRandomAccessRange!SourceRange && isRandomAccessRange!DestRange 
-        && (is(ElementType!SourceRange.init == ElementType!DestRange.init)) && is(ElementType!SourceRange.init == T))
+    private void calculateBackward(R)(V v, int k, int d, R source, int sourceStartPos, int sourceSize, R dest, 
+        int destStartPos, int destSize) 
+    if ((isRandomAccessRange!R || isSomeString!R) && is(ElementType!E == T))
     {
         const auto up = (k == d + deltaSize_ || (k != -d + deltaSize_ && v[k - 1] < v[k + 1]));
         const int xStart = up ? v[k - 1] : v[k + 1];
@@ -185,8 +183,7 @@ final class Snake(T) {
         Calculates a new snake segment depending on the current comparison direction.
 
         Params:
-            SourceRange    = The source range type
-            DestRange      = The destination range type
+            R              = The source & destination range type
             v              = An array of end points for a given k-line
             k              = The k-line the snake should get calculated for
             d              = Number of differences for the same trace
@@ -197,10 +194,9 @@ final class Snake(T) {
             destStartPos   = The starting position in the array of elements from the second object to compare
             destSize       = The index of the last element from the second object to compare
      */
-    private void calculate(SourceRange, DestRange)(V!T v, int k, int d, SourceRange source, int sourceStartPos, 
-        int sourceSize, DestRange dest, int destStartPos, int destSize) 
-    if (isRandomAccessRange!SourceRange && isRandomAccessRange!DestRange 
-        && (is(ElementType!SourceRange.init == ElementType!DestRange.init)) && is(ElementType!SourceRange.init == T))
+    private void calculate(R)(V v, int k, int d, R source, int sourceStartPos, int sourceSize, R dest, 
+        int destStartPos, int destSize) 
+    if ((isRandomAccessRange!R || isSomeString!R) && is(ElementType!E == T))
     {
         if (isForward_) {
             calculateForward(v, k, d, source, sourceStartPos, sourceSize, dest, destStartPos, destSize);
@@ -291,8 +287,7 @@ final class Snake(T) {
         Creates a new instance and calculates the segment based on the provided data.
 
         Params:
-            SourceRange    = The source range type
-            DestRange      = The destination range type
+            R              = The source & destination range type
             sourceStartPos = The starting position in the array of elements from the first object to compare
             sourceSize     = The index of the last element from the first object to compare
             destStartPos   = The starting position in the array of elements from the second object to compare
@@ -306,10 +301,9 @@ final class Snake(T) {
             source         = Elements of the first object. Usually the original object
             dest           = Elements of the second object. Usually the current object
      */
-    static Snake!T create(SourceRange, DestRange)(int sourceStartPos, int sourceSize, int destStartPos, int destSize,
-        bool isForward, int delta, V!T v, int k, int d, SourceRange source, DestRange dest)
-    if (isRandomAccessRange!SourceRange && isRandomAccessRange!DestRange 
-        && (is(ElementType!SourceRange.init == ElementType!DestRange.init)) && is(ElementType!SourceRange.init == T))
+    static Snake!T create(R)(int sourceStartPos, int sourceSize, int destStartPos, int destSize,
+        bool isForward, int delta, V v, int k, int d, R source, R dest)
+    if ((isRandomAccessRange!R || isSomeString!R) && is(ElementType!E == T))
     {
         auto snake = new Snake!T(isForward, delta);
         
@@ -319,52 +313,52 @@ final class Snake(T) {
     }
 
     /// Returns: The x-position of the start point for this snake segment
-    @property int xStart() const {
+    @property int xStart() {
         return xStart_;
     }
 
     /// Returns: The y-position of the start point for this snake segment
-    @property int yStart() const {
+    @property int yStart() {
         return yStart_;
     }
 
     /// Returns: The start point of this snake segment
-    @property auto startPoint() const {
+    @property auto startPoint() {
         return point(xStart_, yStart_);
     }
 
     /// Returns: The x-position of the middle point for this snake segment
-    @property int xMid() const {
+    @property int xMid() {
         return isForward_ ? (xStart_ + deleted_) : (xStart_ - deleted_);
     }
 
     /// Returns: The y-position of the middle point for this snake segment
-    @property int yMid() const {
+    @property int yMid() {
         return isForward_ ? (yStart_ + inserted_) : (yStart_ - inserted_);
     }
 
     /// Returns: The middle point of this snake segment
-    @property auto midPoint() const {
+    @property auto midPoint() {
         return point(xMid, yMid);
     }
 
     /// Returns: The x-position of the end point for this snake segment
-    @property int xEnd() const {
+    @property int xEnd() {
         return isForward_ ? (xStart_ + deleted_ + diagonalLength_) : (xStart_ - deleted_ - diagonalLength_);
     }
 
     /// Returns: The y-position of the end point for this snake segment
-    @property int yEnd() const {
+    @property int yEnd() {
         return isForward_ ? (yStart_ + inserted_ + diagonalLength_) : (yStart_ - inserted_ - diagonalLength_);
     }
 
     /// Returns: The end point of this snake segment
-    @property auto endPoint() const {
+    @property auto endPoint() {
         return point(xEnd, yEnd);
     }
 
     /// Returns: true if this snake segment is a middle point.
-    @property bool isMiddle() const {
+    @property bool isMiddle() {
         return isMiddle_;
     }
 
@@ -380,26 +374,26 @@ final class Snake(T) {
     }
 
     /// Returns: The number of inserted elements from the second object to match the first object (BInserted)
-    @property int inserted() const {
+    @property int inserted() {
         return inserted_;
     }
 
     /// Returns: The number of deleted elements from the first object to match the second object (ADeleted)
-    @property int deleted() const {
+    @property int deleted() {
         return deleted_;
     }
 
     /// Returns: the number of equal elements in both objects
-    @property int diagonalLength() const {
+    @property int diagonalLength() {
         return diagonalLength_;
     }
 
     /// Returns: The comparison direction of both objects
-    @property bool isForward() const {
+    @property bool isForward() {
         return isForward_;
     }
 
-    override string toString() const {
+    override string toString() {
         return format!"Snake{type = %s, start = (%s, %s), del = %s, ins = %s, diagLen = %s, end = (%s, %s), k = %s}"(
             (isForward_) ? "F" : "R", xStart_, yStart_, deleted_, inserted_, diagonalLength_, xEnd, yEnd, xMid - yMid);
     }

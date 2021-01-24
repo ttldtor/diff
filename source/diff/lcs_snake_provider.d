@@ -13,6 +13,8 @@ import diff.snake;
 import diff.snake_pair;
 import expected;
 import std.typecons;
+import std.range.primitives;
+import std.traits;
 
 /**
     Utility class that provides functions to calculate the longest common subsequence (LCS) for forward, backward and 
@@ -27,8 +29,7 @@ final class LcsSnakeProvider(T) {
         Calculates the longest common subsequence (LCS) in a forward manner for two objects.
 
         Params:
-            SourceRange    = The source range type
-            DestRange      = The destination range type
+            R              = The source & destination range type
             source         = Elements of the first object. Usually the original object
             sourceSize     = The index of the last element from the first object to compare
             dest           = Elements of the second object. Usually the current object
@@ -38,10 +39,8 @@ final class LcsSnakeProvider(T) {
 
         Returns: The new snake that represents LCS or an error
      */
-    Expected!(Snake!T, string) forward(SourceRange, DestRange)(SourceRange source, int sourceSize, DestRange dest, 
-        int destSize, V!T v, int d)
-    if (isRandomAccessRange!SourceRange && isRandomAccessRange!DestRange 
-        && (is(ElementType!SourceRange.init == ElementType!DestRange.init)) && is(ElementType!SourceRange.init == T))
+    Expected!(Snake!T, string) forward(R)(R source, int sourceSize, R dest, int destSize, V v, int d)
+    if ((isRandomAccessRange!R || isSomeString!R))
     {
         for (int k = -d; k <= d; k += 2) {
             auto down = (k == -d || (k != d && v[k - 1] < v[k + 1]));
@@ -71,8 +70,7 @@ final class LcsSnakeProvider(T) {
         Calculates the longest common subsequence (LCS) in a backward manner for two objects.
 
         Params:
-            SourceRange    = The source range type
-            DestRange      = The destination range type
+            R              = The source & destination range type
             source         = Elements of the first object. Usually the original object
             sourceSize     = The index of the last element from the first object to compare
             dest           = Elements of the second object. Usually the current object
@@ -82,10 +80,8 @@ final class LcsSnakeProvider(T) {
 
         Returns: The new snake that represents LCS or an error
      */
-    Expected!(Snake!T, string) reverse(SourceRange, DestRange)(SourceRange source, int sourceSize, DestRange dest, 
-        int destSize, V!T v, int d)
-    if (isRandomAccessRange!SourceRange && isRandomAccessRange!DestRange 
-        && (is(ElementType!SourceRange.init == ElementType!DestRange.init)) && is(ElementType!SourceRange.init == T))
+    Expected!(Snake!T, string) reverse(R)(R source, int sourceSize, R dest, int destSize, V v, int d)
+    if ((isRandomAccessRange!R || isSomeString!R))
     {
         const deltaSize = sourceSize - destSize;
 
@@ -118,8 +114,7 @@ final class LcsSnakeProvider(T) {
         The overlap of both comparisons is the so called middle snake which is already a part of the solution as proven by Myers.
 
         Params:
-            SourceRange    = The source range type
-            DestRange      = The destination range type
+            R              = The source & destination range type
             source         = Elements of the first object. Usually the original object
             sourceStartPos = The starting position in the array of elements from the first object to compare (a0)
             sourceSize     = The index of the last element from the first object to compare
@@ -133,11 +128,9 @@ final class LcsSnakeProvider(T) {
 
         Returns: The first segment found by both comparison directions which is also called the middle snake or an error
      */
-    Expected!(SnakePair!T, string) middle(SourceRange, DestRange)(SourceRange source, int sourceStartPos, 
-        int sourceSize, DestRange dest, int destStartPos, int destSize, V!T vForward, V!T vReverse, V!T[]* forwardVs, 
-        V!T[]* reverseVs)
-    if (isRandomAccessRange!SourceRange && isRandomAccessRange!DestRange 
-        && (is(ElementType!SourceRange.init == ElementType!DestRange.init)) && is(ElementType!SourceRange.init == T))
+    Expected!(SnakePair!T, string) middle(R)(R source, int sourceStartPos, int sourceSize, R dest, int destStartPos, 
+        int destSize, V vForward, V vReverse, V[]* forwardVs, V[]* reverseVs)
+    if ((isRandomAccessRange!R || isSomeString!R))
     {
         const maxSize = (sourceSize + destSize + 1) / 2;
         auto deltaSize = sourceSize - destSize;
@@ -189,7 +182,7 @@ final class LcsSnakeProvider(T) {
                     auto forward = new Snake!T(sourceStartPos, sourceSize, destStartPos, destSize, true, 
                         xStart + sourceStartPos, yStart + destStartPos, down, diagonalLength, d);
 
-                    return new SnakePair!T(2 * d - 1, forward, null);
+                    return ok(new SnakePair!T(2 * d - 1, forward, null));
                 }
             }
 
@@ -234,7 +227,7 @@ final class LcsSnakeProvider(T) {
                     auto reverse = new Snake!T(sourceStartPos, sourceSize, destStartPos, destSize, false, 
                         xStart + sourceStartPos, yStart + destStartPos, up, diagonalLength, d);
 
-                    return new SnakePair!T(2 * d, null, reverse);
+                    return ok(new SnakePair!T(2 * d, null, reverse));
                 }
             }
         }

@@ -16,11 +16,8 @@ import expected;
     This class is a helper class to store the actual x-positions of end-points on a k-line.
     It further provides a method to calculate the y-position for end-points based on the x-position and the k-line the
     end point is lying on.
- 
-    Params:
-        T = Source and destination element's type
  */
-final class V(T) {
+final class V {
     private {
 
         /// Comparison direction flag
@@ -136,7 +133,7 @@ final class V(T) {
         
         Returns: The deep copy of this object or error
      */
-    Expected!(V!T, string) createCopy(int numberOfDifferences, bool isForward, int deltaSize)
+    Expected!(V, string) createCopy(int numberOfDifferences, bool isForward, int deltaSize)
     in (!(isForward && deltaSize != 0))
     {
         auto calculatedNumberOfDifferences = numberOfDifferences;
@@ -145,7 +142,7 @@ final class V(T) {
             calculatedNumberOfDifferences++;
         }
 
-        auto copy = new V!T();
+        auto copy = new V();
 
         copy.isForward_ = isForward;
         copy.maxSize_ = calculatedNumberOfDifferences;
@@ -165,7 +162,7 @@ final class V(T) {
                 copy.data_[idx] = data_[(idx.to!int + startPos).to!size_t];
             }
         } else {
-            return err!(V!T)("V!T.createCopy: calculatedNumberOfDifferences > maxSize");
+            return err!(V)("V.createCopy: calculatedNumberOfDifferences > maxSize");
         }
 
         return ok(copy);
@@ -174,7 +171,7 @@ final class V(T) {
 
 unittest {
     import std.stdio: writeln;
-    auto v = new V!int(30, 50, true, true);
+    auto v = new V(30, 50, true, true);
 
     writeln(v);
 

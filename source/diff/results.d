@@ -20,8 +20,8 @@ import diff.snake;
 final class Results(T) {
     private {
         Snake!T[] snakes_;
-        V!T[] forwardVs_;
-        V!T[] reverseVs_;
+        V[] forwardVs_;
+        V[] reverseVs_;
     }
 
     /**
@@ -32,7 +32,7 @@ final class Results(T) {
             forwardVs = The end points in forward direction
             reverseVs = The end points in backward direction
      */
-    this(Snake!T[] snakes, V!T[] forwardVs, V!T[] reverseVs) {
+    this(Snake!T[] snakes, V[] forwardVs, V[] reverseVs) {
         snakes_ = snakes;
         forwardVs_ = forwardVs;
         reverseVs_ = reverseVs;
@@ -46,7 +46,7 @@ final class Results(T) {
             forward   = The direction flag. `True` - forward direction, `False` - backward direction.
             vs = The end points
      */
-    this(Snake!T[] snakes, bool forward, V!T[] vs) {
+    this(Snake!T[] snakes, bool forward, V[] vs) {
         snakes_ = snakes;
 
         if (forward) {
@@ -58,17 +58,17 @@ final class Results(T) {
 
     @property {
         /// Returns: The snake segments
-        Snake!T[] snakes() const {
+        Snake!T[] snakes() {
             return snakes_;
         }
 
         /// Returns: The end points in forward direction 
-        V!T[] forwardVs() const {
+        V[] forwardVs() {
             return forwardVs_;
         }
 
         /// Returns: The end points in backward direction 
-        V!T[] reverseVs() const {
+        V[] reverseVs() {
             return reverseVs_;
         }
     }
