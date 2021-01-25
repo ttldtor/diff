@@ -84,7 +84,7 @@ final class LinearComparator(T) {
             vForward, vReverse, forwardVs, reverseVs);
 
         if (!middleOpt) {
-            return err!void("LinearComparator!T.compare: middle snakes pair is empty");
+            return err("LinearComparator!T.compare: middle snakes pair is empty");
         }
 
         SnakePair!T middle = middleOpt.value;
@@ -142,7 +142,7 @@ final class LinearComparator(T) {
             if (forward !is null) {
                 if (forward.xStart > sourceStartPos) {
                     if (forward.xStart - sourceStartPos != forward.yStart- destStartPos) {
-                        return err!void("LinearComparator!T.compare: missed D0 forward");
+                        return err("LinearComparator!T.compare: missed D0 forward");
                     }
 
                     auto snake = new Snake!T(sourceStartPos, sourceSize, destStartPos, destSize, true, sourceStartPos, 
@@ -168,7 +168,7 @@ final class LinearComparator(T) {
                 // D0
                 if (reverse.xStart < sourceStartPos + sourceSize) {
                     if (sourceStartPos + sourceSize - reverse.xStart != destStartPos + destSize - reverse.yStart) {
-                        return err!void("LinearComparator!T.compare: missed D0 reverse");
+                        return err("LinearComparator!T.compare: missed D0 reverse");
                     }
 
                     auto snake = new Snake!T(sourceStartPos, sourceSize, destStartPos, destSize, true, reverse.xStart, 
