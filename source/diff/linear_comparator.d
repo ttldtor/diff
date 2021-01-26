@@ -238,75 +238,6 @@ auto linearComparator(R)() {
     return LinearComparatorFabric.create!R();
 }
 
-void dumpResults(R, T)(R source, R dest, Snake!T[] snakes) {
-    import std.stdio: writefln;
-
-    writefln("%s ~ %s", source, dest);
-    foreach(s; snakes) {
-        if (s.isForward) {
-            auto xStart = s.xStart;
-            auto yStart = s.yStart;
-            auto xEnd = s.xEnd;
-            auto yEnd = s.yEnd;
-
-            if (s.deleted > 0) {
-                writefln("- |%s", source[xStart .. xEnd - s.diagonalLength]);
-            }
-
-            if (s.inserted > 0) {
-                writefln("+ |%s", dest[yStart .. yEnd - s.diagonalLength]);
-            }
-
-            if (s.diagonalLength > 0) {
-                writefln("  |%s", source[xStart + s.deleted .. xEnd]);
-            }
-        } else {
-            auto xStart = s.xEnd;
-            auto yStart = s.yEnd;
-            auto xEnd = s.xStart;
-            auto yEnd = s.yStart;
-
-            if (s.diagonalLength > 0) {
-                writefln("  |%s", source[xStart .. xEnd - s.deleted]);
-            }
-
-            if (s.deleted > 0) {
-                writefln("- |%s", source[xStart + s.diagonalLength .. xEnd]);
-            }
-
-            if (s.inserted > 0) {
-                writefln("+ |%s", dest[yStart + s.diagonalLength .. yEnd]);
-            }
-        }
-    }
-}
-
-R applyResults(R, T)(R source, R dest, Snake!T[] snakes) {
-    R result;
-
-    foreach(s; snakes) {
-        if (s.isForward) {
-            if (s.inserted > 0) {
-                result ~= dest[s.yStart .. s.yEnd - s.diagonalLength];
-            }
-
-            if (s.diagonalLength > 0) {
-                result ~= source[s.xStart + s.deleted .. s.xEnd];
-            }
-        } else {
-            if (s.diagonalLength > 0) {
-                result ~= source[s.xEnd .. s.xStart - s.deleted];
-            }
-
-            if (s.inserted > 0) {
-                result ~= dest[s.yEnd + s.diagonalLength .. s.yStart];
-            }
-        }
-    }
-
-    return result;
-}
-
 version(unittest) {
     template TestCase(alias source, alias dest) {
         import std.format;
@@ -323,8 +254,8 @@ version(unittest) {
             assert(results.value.snakes.length > 0);
 
             writeln(results.value.snakes); writeln;
-            dumpResults(source, dest, results.value.snakes);
-            auto sourcePlusDiff = applyResults(source, dest, results.value.snakes);
+            results.value.dumpResults(source, dest);
+            auto sourcePlusDiff = results.value.applyResults(source, dest);
             writeln(sourcePlusDiff);
             assert(sourcePlusDiff == dest);
         };

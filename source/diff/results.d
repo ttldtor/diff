@@ -72,4 +72,93 @@ final class Results(T) {
             return reverseVs_;
         }
     }
+
+    /**
+        Dumps the results of comapre (i.e. diff)
+
+        Params:
+            R      = The source & destination range type
+            source = Elements of the first object. Usually the original object
+            dest   = Elements of the second object. Usually the current object
+     */
+    void dumpResults(R)(R source, R dest) {
+        import std.stdio: writefln;
+
+        writefln("%s ~ %s", source, dest);
+        foreach(s; snakes_) {
+            if (s.isForward) {
+                auto xStart = s.xStart;
+                auto yStart = s.yStart;
+                auto xEnd = s.xEnd;
+                auto yEnd = s.yEnd;
+
+                if (s.deleted > 0) {
+                    writefln("- |%s", source[xStart .. xEnd - s.diagonalLength]);
+                }
+
+                if (s.inserted > 0) {
+                    writefln("+ |%s", dest[yStart .. yEnd - s.diagonalLength]);
+                }
+
+                if (s.diagonalLength > 0) {
+                    writefln("  |%s", source[xStart + s.deleted .. xEnd]);
+                }
+            } else {
+                auto xStart = s.xEnd;
+                auto yStart = s.yEnd;
+                auto xEnd = s.xStart;
+                auto yEnd = s.yStart;
+
+                if (s.diagonalLength > 0) {
+                    writefln("  |%s", source[xStart .. xEnd - s.deleted]);
+                }
+
+                if (s.deleted > 0) {
+                    writefln("- |%s", source[xStart + s.diagonalLength .. xEnd]);
+                }
+
+                if (s.inserted > 0) {
+                    writefln("+ |%s", dest[yStart + s.diagonalLength .. yEnd]);
+                }
+            }
+        }
+    }
+
+    /**
+        Applies the results of comapre (i.e. diff) to `source`
+
+        Params:
+            R      = The source & destination range type
+            source = Elements of the first object. Usually the original object
+            dest   = Elements of the second object. Usually the current object
+        
+        Returns: The result of applying
+     */
+    R applyResults(R)(R source, R dest) {
+        R result;
+
+        foreach(s; snakes_) {
+            if (s.isForward) {
+                if (s.inserted > 0) {
+                    result ~= dest[s.yStart .. s.yEnd - s.diagonalLength];
+                }
+
+                if (s.diagonalLength > 0) {
+                    result ~= source[s.xStart + s.deleted .. s.xEnd];
+                }
+            } else {
+                if (s.diagonalLength > 0) {
+                    result ~= source[s.xEnd .. s.xStart - s.deleted];
+                }
+
+                if (s.inserted > 0) {
+                    result ~= dest[s.yEnd + s.diagonalLength .. s.yStart];
+                }
+            }
+        }
+
+        return result;
+    }
 }
+
+
