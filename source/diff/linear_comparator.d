@@ -307,26 +307,28 @@ R applyResults(R, T)(R source, R dest, Snake!T[] snakes) {
     return result;
 }
 
-template TestCase(alias source, alias dest) {
-    import std.format;
+version(unittest) {
+    template TestCase(alias source, alias dest) {
+        import std.format;
 
-    enum TestCase = q{
-        import std.stdio: writeln;
-    } 
-    ~ "auto source = " ~ source ~ ";\n"
-    ~ "auto dest = " ~ dest ~ ";\n"
-    ~ q{
-        auto results = LinearComparatorFabric.create!string().compare(source, dest);
+        enum TestCase = q{
+            import std.stdio: writeln;
+        } 
+        ~ "auto source = " ~ source ~ ";\n"
+        ~ "auto dest = " ~ dest ~ ";\n"
+        ~ q{
+            auto results = LinearComparatorFabric.create!string().compare(source, dest);
 
-        assert(results.hasValue);
-        assert(results.value.snakes.length > 0);
+            assert(results.hasValue);
+            assert(results.value.snakes.length > 0);
 
-        writeln(results.value.snakes); writeln;
-        dumpResults(source, dest, results.value.snakes);
-        auto sourcePlusDiff = applyResults(source, dest, results.value.snakes);
-        writeln(sourcePlusDiff);
-        assert(sourcePlusDiff == dest);
-    };
+            writeln(results.value.snakes); writeln;
+            dumpResults(source, dest, results.value.snakes);
+            auto sourcePlusDiff = applyResults(source, dest, results.value.snakes);
+            writeln(sourcePlusDiff);
+            assert(sourcePlusDiff == dest);
+        };
+    }
 }
 
 unittest {
