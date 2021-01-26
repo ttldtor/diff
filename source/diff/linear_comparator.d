@@ -87,9 +87,9 @@ final class LinearComparator(T) {
             return err("LinearComparator!T.compare: middle snakes pair is empty");
         }
 
-        SnakePair!T middle = middleOpt.value;
-        Snake!T forward = middle.forward;
-        Snake!T reverse = middle.reverse;
+        auto middle = middleOpt.value;
+        auto forward = middle.forward;
+        auto reverse = middle.reverse;
 
         // Initial setup for recursion
         if (recursion == 0) {
@@ -238,24 +238,109 @@ auto linearComparator(R)() {
     return LinearComparatorFabric.create!R();
 }
 
+void dumpResults(R, T)(R source, R dest, Snake!T[] snakes) {
+    import std.stdio: writefln;
+
+    writefln("%s ~ %s", source, dest);
+    foreach(s; snakes) {
+        if (s.isForward) {
+            auto xStart = s.xStart;
+            auto yStart = s.yStart;
+            auto xEnd = s.xEnd;
+            auto yEnd = s.yEnd;
+
+            if (s.deleted > 0) {
+                writefln("- |%s", source[xStart .. xEnd - s.diagonalLength]);
+            }
+
+            if (s.inserted > 0) {
+                writefln("+ |%s", dest[yStart .. yEnd - s.diagonalLength]);
+            }
+
+            if (s.diagonalLength > 0) {
+                writefln("  |%s", source[xStart + s.deleted .. xEnd]);
+            }
+        } else {
+            auto xStart = s.xEnd;
+            auto yStart = s.yEnd;
+            auto xEnd = s.xStart;
+            auto yEnd = s.yStart;
+
+            if (s.diagonalLength > 0) {
+                writefln("  |%s", source[xStart .. xEnd - s.deleted]);
+            }
+
+            if (s.deleted > 0) {
+                writefln("- |%s", source[xStart + s.diagonalLength .. xEnd]);
+            }
+
+            if (s.inserted > 0) {
+                writefln("+ |%s", dest[yStart + s.diagonalLength .. yEnd]);
+            }
+        }
+    }
+}
+
+R applyResults(R, T)(R source, R dest, Snake!T[] snakes) {
+    R result;
+
+    foreach(s; snakes) {
+        if (s.isForward) {
+            if (s.inserted > 0) {
+                result ~= dest[s.yStart .. s.yEnd - s.diagonalLength];
+            }
+
+            if (s.diagonalLength > 0) {
+                result ~= source[s.xStart + s.deleted .. s.xEnd];
+            }
+        } else {
+            if (s.diagonalLength > 0) {
+                result ~= source[s.xEnd .. s.xStart - s.deleted];
+            }
+
+            if (s.inserted > 0) {
+                result ~= dest[s.yEnd + s.diagonalLength .. s.yStart];
+            }
+        }
+    }
+
+    return result;
+}
+
+template TestCase(alias source, alias dest) {
+    import std.format;
+
+    enum TestCase = q{
+        import std.stdio: writeln;
+    } 
+    ~ "auto source = " ~ source ~ ";\n"
+    ~ "auto dest = " ~ dest ~ ";\n"
+    ~ q{
+        auto results = LinearComparatorFabric.create!string().compare(source, dest);
+
+        assert(results.hasValue);
+        assert(results.value.snakes.length > 0);
+
+        writeln(results.value.snakes); writeln;
+        dumpResults(source, dest, results.value.snakes);
+        auto sourcePlusDiff = applyResults(source, dest, results.value.snakes);
+        writeln(sourcePlusDiff);
+        assert(sourcePlusDiff == dest);
+    };
+}
+
 unittest {
-    import std.stdio: writeln;
-    
-    auto comparator = LinearComparatorFabric.create!string();
+    mixin(TestCase!(`""`, `"1"`));
+}
 
-    auto result = comparator.compare("abcdabcd", "abcdbcda");
+unittest {
+    mixin(TestCase!(`"0"`, `"1"`));
+}
 
-    assert(result.hasValue);
-    assert(result.value.snakes.length > 0);
+unittest {
+    mixin(TestCase!(`"abcdabcd"`, `"abcdbcdaxx"`));
+}
 
-    writeln(result.value.snakes);
-
-    auto comparator2 = linearComparator!(int[])();
-
-    auto result2 = comparator2.compare([0, 1, 2, 0, 0], [1, 2, 0, 0, 0]);
-
-    assert(result2.hasValue);
-    assert(result2.value.snakes.length > 0);
-
-    writeln(result2.value.snakes);
+unittest {
+    mixin(TestCase!(`[0, 1, 2, 0, 0]`, `[1, 2, 0, 0, 0, 3]`));
 }

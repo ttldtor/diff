@@ -358,7 +358,7 @@ final class Snake(T) {
     }
 
     /// Returns: true if this snake segment is a middle point.
-    @property bool isMiddle() {
+    @property bool isMiddle() const {
         return isMiddle_;
     }
 
