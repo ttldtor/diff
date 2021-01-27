@@ -9,9 +9,15 @@
 module diff.greedy_comparator;
 
 import diff.snake;
+import diff.snake_pair;
 import diff.v;
 import diff.results;
 import diff.lcs_snake_provider;
+import expected;
+import std.range.primitives;
+import std.traits;
+import std.conv;
+import std.format;
 
 /**
     Greedy comparator
@@ -20,4 +26,56 @@ import diff.lcs_snake_provider;
         T = The type of the element the snakes will hold
  */
 final class GreedyComparator(T) {
+
+    /**
+        Finds all snakes that lead to the solution by taking a snapshot of each end point after each iteration of d and
+        then working backwards from d<sub>solution</sub> to 0.
+
+        Params:
+            R              = The source & destination range type
+            snakes         = The possible solution paths for transforming object $(D_PARAM source) to $(D_PARAM dest)
+            vs             = All saved end points indexed on <em>d</em>
+            source         = Elements of the first object. Usually the original object
+            sourceSize     = The number of elements of the first object to compare
+            dest           = Elements of the second object. Usually the current object
+            destSize       = The number of elements of the second object to compare
+
+        Returns: ok() if the ranges could be compared; Error string (err!void) otherwise
+
+     */
+    Expected!void solveForward(R)(ref Snake!T[] snakes, const ref V[] vs, R source, int sourceSize, R dest, 
+        int destSize) 
+    if (isRandomAccessRange!R || isSomeString!R)
+    {
+        auto p = point(sourceSize, destSize);
+
+        for (int d = vs.length - 1; p.x > 0 || p.y > 0; d--) {
+            auto k = p.x - p.y;
+            auto xEnd = vs[d][k];
+            auto yEnd = xEnd - k;
+
+            if (xEnd != p.x || yEnd != p.y) {
+                return err(
+                    format!"GreedyComparator!T.solveForward: No solution for d: %s, k: %s, p:(%s, %s), V:(%s, %s)"(d, k, 
+                        p.x, p.y, xEnd, yEnd));
+            }
+
+            auto solution = Snake!T.create(0, p.x, 0, p.y, true, 0, vs[d], k, d, source, dest);
+
+            if (solution.xEnd != p.x || solution.yEnd != p.y) {
+                return err(
+                    format!"GreedyComparator!T.solveForward: Missed solution for d: %s, k: %s, p:(%s, %s), V:(%s, %s)"(
+                        d, k, p.x, p.y, xEnd, yEnd));
+            }
+
+            if (snakes.length == 0 || !snakes[0].append(solution)) {
+                snakes = solution ~ snakes;
+            }
+
+            p.x = solution.xStart;
+            p.y = solution.yStart;
+        }
+
+        return ok();
+    }
 }
