@@ -113,21 +113,27 @@ final class Snake(T) {
         int destStartPos, int destSize) 
     if ((isRandomAccessRange!R || isSomeString!R) && is(ElementType!E == T))
     {
+        // determine if a insertion (down) or a deletion (right) occurred
         const auto down = (k == -d || (k != d && v[k - 1] < v[k + 1]));
-        const int xStart = down ? v[K - 1] : v[k + 1];
+
+        // calculate the x and y position based on the movement direction
+        const int xStart = down ? v[K + 1] : v[k - 1];
         const int yStart = xStart - (down ? k + 1 : k - 1);
+
+        // calculate the x and y position of the end point
         int xEnd = down ? xStart : xStart + 1;
         int yEnd = xEnd - k;
+
+        // calculate the number of equal elements in both objects for this segment
         int snake = 0;
 
-        while (xEnd < sourceSize && yEnd < destSize 
-            && source[(xEnd + sourceStartPos).to!size_t] == dest[(yEnd + destStartPos).to!size_t]) 
-        {
+        while (xEnd < sourceSize && yEnd < destSize && source[xEnd + sourceStartPos] == dest[yEnd + destStartPos]) {
             xEnd++;
             yEnd++;
             snake++;
         }
 
+        // assign the calculated values to the fields of this instance
         xStart_ = xStart + sourceStartPos;
         yStart_ = yStart + destStartPos;
         deleted_ = down ? 0 : 1;
@@ -156,12 +162,19 @@ final class Snake(T) {
         int destStartPos, int destSize) 
     if ((isRandomAccessRange!R || isSomeString!R) && is(ElementType!E == T))
     {
+        // determine if a insertion (up) or a deletion (left) occurred
         const auto up = (k == d + deltaSize_ || (k != -d + deltaSize_ && v[k - 1] < v[k + 1]));
+
+        // calculate the x and y position based on the movement direction
         const int xStart = up ? v[k - 1] : v[k + 1];
         const int yStart = xStart - (up ? k - 1 : k + 1);
+
+        // calculate the x and y position of the end point
         int xEnd = up ? xStart : xStart - 1;
         int yEnd = xEnd - k;
-        int snake = 0;
+
+        // calculate the number of equal elements in both objects for this segment by following diagonals
+        int snake = 0; 
 
         while (xEnd > 0 && yEnd > 0 
             && source[(xEnd - 1).to!size_t] == dest[(yEnd - 1).to!size_t]) {
@@ -170,6 +183,7 @@ final class Snake(T) {
             snake++;
         }
 
+        // assign the calculated values to the fields of this instance
         xStart_ = xStart;
         yStart_ = yStart;
         deleted_ = up ? 0 : 1;
