@@ -219,6 +219,9 @@ final class Snake(T) {
         }
     }
 
+    /// The default constructor
+    this() {}
+
     /**
         Initializes a new snake. The comparison direction can be defined via the isForward parameter.
         If set to true, the comparison will be done from start till end, while a value of false will result in a 
@@ -298,6 +301,36 @@ final class Snake(T) {
     }
 
     /**
+        Initializes a new snake segment.
+
+        Params:
+            sourceStartPos = The starting position in the array of elements from the first object to compare (a0)
+            sourceSize     = The index of the last element from the first object to compare (N)
+            destStartPos   = The starting position in the array of elements from the second object to compare (b0)
+            destSize       = The index of the last element from the second object to compare (M)
+            isForward      = If set to true a forward comparison will be done; else a backward comparison
+            xStart         = The x-position of the current node
+            yStart         = The y-position of the current node
+            down           = Defines if insertion (down movement; true) or a deletion (right movement; false) should
+                             be done
+            diagonalLength = Defines the number of equal elements in both objects for a given segment
+            d              = The value of 0 or 1 indicate an edge, where 0 means both objects are equal while 1 means 
+                             there is either one insertion or one deletion
+     */
+    this(int sourceStartPos, int sourceSize, int destStartPos, int destSize, bool isForward, int xStart, int yStart, 
+        bool down, int diagonalLength, int d)
+    {
+        xStart_ = xStart;
+        yStart_ = yStart;
+        deleted_ = down ? 0 : 1;
+        inserted_ = down ? 1 : 0;
+        diagonalLength_ = diagonalLength;
+        isForward_ = isForward;
+
+        removeStubs(sourceStartPos, sourceSize, destStartPos, destSize);
+    }
+
+    /**
         Creates a new instance and calculates the segment based on the provided data.
 
         Params:
@@ -319,7 +352,10 @@ final class Snake(T) {
         bool isForward, int delta, V v, int k, int d, R source, R dest)
     if ((isRandomAccessRange!R || isSomeString!R) && is(ElementType!E == T))
     {
-        auto snake = new Snake!T(isForward, delta);
+        auto snake = new Snake!T();
+
+        snake.isForward = isForward;
+        snake.delta = delta;
         
         snake.calculate(v, k, d, source, sourceStartPos, sourceSize, dest, destStartPos, destSize);
 

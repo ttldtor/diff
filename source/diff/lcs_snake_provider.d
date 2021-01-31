@@ -154,7 +154,7 @@ final class LcsSnakeProvider(T) {
                 }
 
                 for (auto k = -d; k <= d; k += 2) {
-                    const down = k == -d || (k != d && vForward[k - 1] < vForward[k + 1]);
+                    const down = (k == -d || (k != d && vForward[k - 1] < vForward[k + 1]));
                     const xStart = down ? vForward[k + 1] : vForward[k - 1];
                     const yStart = xStart - (down ? k + 1 : k - 1);
                     auto xEnd = down ? xStart : xStart + 1;
@@ -199,7 +199,7 @@ final class LcsSnakeProvider(T) {
                 }
 
                 for (auto k = -d + deltaSize; k <= d + deltaSize; k += 2) {
-                    const up = k == d + deltaSize || (k != -d + deltaSize && vReverse[k - 1] < vReverse[k + 1]);
+                    const up = (k == d + deltaSize || (k != -d + deltaSize && vReverse[k - 1] < vReverse[k + 1]));
                     const xStart = up ? vReverse[k - 1] : vReverse[k + 1];
                     const yStart = xStart - (up ? k - 1 : k + 1);
                     auto xEnd = up ? xStart : xStart - 1;
