@@ -42,20 +42,29 @@ final class LcsSnakeProvider(T) {
     Expected!(Snake!T, string) forward(R)(R source, int sourceSize, R dest, int destSize, V v, int d)
     if (isRandomAccessRange!R || isSomeString!R)
     {
+        // An important observation for the implementation is that end points for even d are on even k-lines only and 
+        // vice-versa. That's why k+=2
         for (int k = -d; k <= d; k += 2) {
             auto down = (k == -d || (k != d && v[k - 1] < v[k + 1]));
+
+            // to get to a line k, we either must move down (k+1) or right (k-1)
             auto xStart = down ? v[k + 1] : v[k - 1];
+            // y can easily calculated by subtracting k from x --> y = x - k
             auto yStart = xStart - (down ? k + 1 : k - 1);
+
+            // calculate end points
             auto xEnd = down ? xStart : xStart + 1;
             auto yEnd = xEnd - k;
             auto diagonalLength = 0;
 
+            // follow diagonals
             while (xEnd < sourceSize && yEnd < destSize && source[xEnd] == dest[yEnd]) {
                 xEnd++;
                 yEnd++;
                 diagonalLength++;
             }
             
+            // save end points
             v[k] = xEnd;
             
             if (xEnd >= sourceSize && yEnd >= destSize) {
@@ -83,16 +92,27 @@ final class LcsSnakeProvider(T) {
     Expected!(Snake!T, string) reverse(R)(R source, int sourceSize, R dest, int destSize, V v, int d)
     if (isRandomAccessRange!R || isSomeString!R)
     {
+        // As the length of sequences pa and pb can be different, the k lines of the forward and reverse algorithms 
+        // can be different. It is useful to isolate this difference as a variable.
         const deltaSize = sourceSize - destSize;
 
+        // An important observation for the implementation is that end points for even d are on even k-lines only and 
+        // vice-versa. That's why k+=2
         for (auto k = -d + deltaSize; k <= d + deltaSize; k += 2) {
+            // are we on the down up-track or on the left one?
             auto up = (k == d + deltaSize || (k != -d + deltaSize && v[k - 1] < v[k + 1]));
+
+            // to get to a line k, we either must move up (k-1) or left (k+1)
             auto xStart = up ? v[k - 1] : v[k + 1];
+            // y can easily calculated by subtracting k from x --> y = x - k
             auto yStart = xStart - (up ? k - 1 : k + 1);
+
+            // calculate end points
             auto xEnd = up ? xStart : xStart - 1;
             auto yEnd = xEnd - k;
             auto diagonalLength = 0;
 
+            // follow diagonals
             while (xEnd > 0 && yEnd > 0 && source[xEnd - 1] == dest[yEnd - 1]) {
                 xEnd--;
                 yEnd--;

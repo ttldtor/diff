@@ -93,15 +93,15 @@ final class Results(T) {
                 auto yEnd = s.yEnd;
 
                 if (s.deleted > 0) {
-                    writefln("- |%s", source[xStart .. xEnd - s.diagonalLength]);
+                    writefln("- |F|%s", source[xStart .. xEnd - s.diagonalLength]);
                 }
 
                 if (s.inserted > 0) {
-                    writefln("+ |%s", dest[yStart .. yEnd - s.diagonalLength]);
+                    writefln("+ |F|%s", dest[yStart .. yEnd - s.diagonalLength]);
                 }
 
                 if (s.diagonalLength > 0) {
-                    writefln("  |%s", source[xStart + s.deleted .. xEnd]);
+                    writefln("  |F|%s", source[xStart + s.deleted .. xEnd]);
                 }
             } else {
                 auto xStart = s.xEnd;
@@ -110,15 +110,15 @@ final class Results(T) {
                 auto yEnd = s.yStart;
 
                 if (s.diagonalLength > 0) {
-                    writefln("  |%s", source[xStart .. xEnd - s.deleted]);
+                    writefln("  |R|%s", source[xStart .. xEnd - s.deleted]);
                 }
 
                 if (s.deleted > 0) {
-                    writefln("- |%s", source[xStart + s.diagonalLength .. xEnd]);
+                    writefln("- |R|%s", source[xStart + s.diagonalLength .. xEnd]);
                 }
 
                 if (s.inserted > 0) {
-                    writefln("+ |%s", dest[yStart + s.diagonalLength .. yEnd]);
+                    writefln("+ |R|%s", dest[yStart + s.diagonalLength .. yEnd]);
                 }
             }
         }
