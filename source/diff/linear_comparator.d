@@ -59,7 +59,7 @@ final class LinearComparator(T) {
             auto right = new Snake!T(sourceStartPos, sourceSize, destStartPos, destSize, true, sourceStartPos, 
                 destStartPos, sourceSize, 0, 0);
 
-            //TODO: fix the snakes' appending
+            //TODO: #1 fix the snakes' appending
             /* 
             if (snakes.length == 0 || !snakes[$ - 1].append(right)) {
                 snakes ~= right;
@@ -73,7 +73,7 @@ final class LinearComparator(T) {
             auto down = new Snake!T(sourceStartPos, sourceSize, destStartPos, destSize, true, sourceStartPos, 
                 destStartPos, 0, destSize, 0);
 
-            //TODO: fix the snakes' appending
+            //TODO: #1 fix the snakes' appending
             /* 
             if (snakes.length == 0 || !snakes[$ - 1].append(down)) {
                 snakes ~= down;
@@ -124,7 +124,7 @@ final class LinearComparator(T) {
 
             // Add middle snake to result
             if (forward !is null) {
-                //TODO: fix the snakes' appending
+                //TODO: #1 fix the snakes' appending
                 /* 
                 if (snakes.length == 0 || !snakes[$ - 1].append(forward)) {
                     snakes ~= forward;
@@ -134,7 +134,7 @@ final class LinearComparator(T) {
             }
 
             if (reverse !is null) {
-                //TODO: fix the snakes' appending
+                //TODO: #1 fix the snakes' appending
                 /*
                 if (snakes.length == 0 || !snakes[$ - 1].append(reverse)) {
                     snakes ~= reverse;
@@ -164,7 +164,7 @@ final class LinearComparator(T) {
                     auto snake = new Snake!T(sourceStartPos, sourceSize, destStartPos, destSize, true, sourceStartPos, 
                         destStartPos, 0, 0, forward.xStart - sourceStartPos);
 
-                    //TODO: fix the snakes' appending
+                    //TODO: #1 fix the snakes' appending
                     /*
                     if (snakes.length == 0 || !snakes[$ - 1].append(snake)) {
                         snakes ~= snake;
@@ -174,7 +174,7 @@ final class LinearComparator(T) {
                 }
 
                 // Add middle snake to results
-                //TODO: fix the snakes' appending
+                //TODO: #1 fix the snakes' appending
                 /*
                 if (snakes.length == 0 || !snakes[$ - 1].append(forward)) {
                     snakes ~= forward;
@@ -185,7 +185,7 @@ final class LinearComparator(T) {
 
             if (reverse !is null) {
                 // Add middle snake to results
-                //TODO: fix the snakes' appending
+                //TODO: #1 fix the snakes' appending
                 /*
                 if (snakes.length == 0 || !snakes[$ - 1].append(reverse)) {
                     snakes ~= reverse;
@@ -202,7 +202,7 @@ final class LinearComparator(T) {
                     auto snake = new Snake!T(sourceStartPos, sourceSize, destStartPos, destSize, true, reverse.xStart, 
                         reverse.yStart, 0, 0, sourceStartPos + sourceSize - reverse.xStart);
 
-                    //TODO: fix the snakes' appending
+                    //TODO: #1 fix the snakes' appending
                     /*
                     if (snakes.length == 0 || !snakes[$ - 1].append(snake)) {
                         snakes ~= snake;
