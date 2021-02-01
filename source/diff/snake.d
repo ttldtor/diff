@@ -14,6 +14,7 @@ import std.format;
 import std.algorithm.comparison;
 import std.range.primitives;
 import std.traits;
+import std.stdio;
 
 /**
     A simple 2D point type
@@ -449,12 +450,7 @@ final class Snake(T) {
     }
 
     /**
-        Combines two snakes of the same kind to reduce the number of returned snakes.
-
-        A snake is of the same kind if both are in the same direction and if both have either a positive deleted(ADeleted) field 
-        or a positive BInserted field, but not either a positive ADeleted and the other a positive inserted(BInserted) field!
-        Moreover, if the snake to append has a DiagonalLength > 0 it is not meant to be of the same kind and therefore
-        should not be appended to this snake.
+        Combines two snakes to reduce the number of returned snakes.
 
         Params:
             snake = The snake to append to the current snake
@@ -462,6 +458,8 @@ final class Snake(T) {
         Returns: true if the snake could be appended to this snake; false otherwise
      */
     bool append(Snake!T snake) {
+        if (isForward_ != snake.isForward_) return false;
+
         if (((isForward_ && diagonalLength_ >= 0) || (!isForward_ && snake.diagonalLength_ >= 0)) 
             && ((deleted_ > 0 && snake.deleted_ > 0) || (inserted_ > 0 && snake.inserted_ > 0)))
         {

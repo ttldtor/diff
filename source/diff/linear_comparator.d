@@ -59,9 +59,13 @@ final class LinearComparator(T) {
             auto right = new Snake!T(sourceStartPos, sourceSize, destStartPos, destSize, true, sourceStartPos, 
                 destStartPos, sourceSize, 0, 0);
 
+            //TODO: fix the snakes' appending
+            /* 
             if (snakes.length == 0 || !snakes[$ - 1].append(right)) {
                 snakes ~= right;
             }
+            */
+            snakes ~= right;
         }
 
         if (sourceSize == 0 && destSize > 0) {
@@ -69,9 +73,13 @@ final class LinearComparator(T) {
             auto down = new Snake!T(sourceStartPos, sourceSize, destStartPos, destSize, true, sourceStartPos, 
                 destStartPos, 0, destSize, 0);
 
+            //TODO: fix the snakes' appending
+            /* 
             if (snakes.length == 0 || !snakes[$ - 1].append(down)) {
                 snakes ~= down;
             }
+            */
+            snakes ~= down;
         }
 
         if (sourceSize <= 0 || destSize <= 0) {
@@ -116,15 +124,23 @@ final class LinearComparator(T) {
 
             // Add middle snake to result
             if (forward !is null) {
+                //TODO: fix the snakes' appending
+                /* 
                 if (snakes.length == 0 || !snakes[$ - 1].append(forward)) {
                     snakes ~= forward;
                 }
+                */
+                snakes ~= forward;
             }
 
             if (reverse !is null) {
+                //TODO: fix the snakes' appending
+                /*
                 if (snakes.length == 0 || !snakes[$ - 1].append(reverse)) {
                     snakes ~= reverse;
                 }
+                */
+                snakes ~= reverse;
             }
 
             // bottom right .. Compare(A[u+1..N], N-u, B[v+1..M], M-v)
@@ -148,22 +164,34 @@ final class LinearComparator(T) {
                     auto snake = new Snake!T(sourceStartPos, sourceSize, destStartPos, destSize, true, sourceStartPos, 
                         destStartPos, 0, 0, forward.xStart - sourceStartPos);
 
+                    //TODO: fix the snakes' appending
+                    /*
                     if (snakes.length == 0 || !snakes[$ - 1].append(snake)) {
                         snakes ~= snake;
                     }
+                    */
+                    snakes ~= snake;
                 }
 
                 // Add middle snake to results
+                //TODO: fix the snakes' appending
+                /*
                 if (snakes.length == 0 || !snakes[$ - 1].append(forward)) {
                     snakes ~= forward;
                 }
+                */
+                snakes ~= forward;
             }
 
             if (reverse !is null) {
                 // Add middle snake to results
+                //TODO: fix the snakes' appending
+                /*
                 if (snakes.length == 0 || !snakes[$ - 1].append(reverse)) {
                     snakes ~= reverse;
                 }
+                */
+                snakes ~= reverse;
 
                 // D0
                 if (reverse.xStart < sourceStartPos + sourceSize) {
@@ -174,9 +202,13 @@ final class LinearComparator(T) {
                     auto snake = new Snake!T(sourceStartPos, sourceSize, destStartPos, destSize, true, reverse.xStart, 
                         reverse.yStart, 0, 0, sourceStartPos + sourceSize - reverse.xStart);
 
+                    //TODO: fix the snakes' appending
+                    /*
                     if (snakes.length == 0 || !snakes[$ - 1].append(snake)) {
                         snakes ~= snake;
                     }
+                    */
+                    snakes ~= snake;
                 }
             }
         }
@@ -276,4 +308,9 @@ unittest {
 
 unittest {
     mixin(TestCase!(`[0, 1, 2, 0, 0]`, `[1, 2, 0, 0, 0, 3]`));
+}
+
+unittest {
+    mixin(TestCase!(`"A snake is of the same kind if both are in the same direction and if both have either a positive ADeleted field"`, 
+    `"A 3534 is of the same123 kind if are the same direction and if both have either a positive 123 field"`));
 }
