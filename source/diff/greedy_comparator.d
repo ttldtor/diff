@@ -61,7 +61,7 @@ final class GreedyComparator(T) {
                         p.x, p.y, xEnd, yEnd));
             }
 
-            auto solution = Snake!T.create(0, p.x, 0, p.y, true, 0, vs[d], k, d, source, dest);
+            const solution = Snake!T.create(0, p.x, 0, p.y, true, 0, vs[d], k, d, source, dest);
 
             if (solution.xEnd != p.x || solution.yEnd != p.y) {
                 return err(
@@ -118,7 +118,7 @@ final class GreedyComparator(T) {
                         p.x, p.y, xEnd, yEnd));
             }
 
-            auto solution = Snake!T.create(p.x, sourceSize - p.x, p.y, destSize - p.y, false, sourceSize - destSize, 
+            const solution = Snake!T.create(p.x, sourceSize - p.x, p.y, destSize - p.y, false, sourceSize - destSize, 
                 vs[d], k, d, source, dest);
 
             if (solution.xEnd != p.x || solution.yEnd != p.y) {
