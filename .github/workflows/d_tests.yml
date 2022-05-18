@@ -25,7 +25,9 @@ jobs:
             matrix:
                 os: [ttldtor-win-x64]
                 dc: [dmd-latest, ldc-latest]
-
+        defaults:
+            run:
+                shell: msys2 {0}
         runs-on: ${{ matrix.os }}
         steps:
             - uses: msys2/setup-msys2@v2
