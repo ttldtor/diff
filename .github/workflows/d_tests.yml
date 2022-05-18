@@ -39,6 +39,7 @@ jobs:
             - name: Install D compiler
               uses: dlang-community/setup-dlang@v1
               with:
+                  msystem: MINGW64
                   compiler: ${{ matrix.dc }}
 
             - name: Run tests
