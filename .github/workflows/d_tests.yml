@@ -12,12 +12,28 @@ jobs:
 
         runs-on: ${{ matrix.os }}
         steps:
+            - uses: actions/checkout@v2
+            - name: Install D compiler
+              uses: dlang-community/setup-dlang@v1
+              with:
+                  compiler: ${{ matrix.dc }}
+            - name: Run tests
+              run: dub -q test
+    test2:
+        name: Dub Tests 2
+        strategy:
+            matrix:
+                os: [ttldtor-win-x64]
+                dc: [dmd-latest, ldc-latest]
+
+        runs-on: ${{ matrix.os }}
+        steps:
             - uses: msys2/setup-msys2@v2
             - uses: actions/checkout@v2
             - name: Install D compiler
               uses: dlang-community/setup-dlang@v1
               with:
                   compiler: ${{ matrix.dc }}
-
             - name: Run tests
               run: dub -q test
+              
