@@ -21,6 +21,7 @@ jobs:
               run: dub -q test
     test2:
         name: Dub Tests 2
+        if: ${{ false }}
         strategy:
             matrix:
                 os: [ttldtor-win-x64]
